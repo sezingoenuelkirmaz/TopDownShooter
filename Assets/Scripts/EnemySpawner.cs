@@ -1,9 +1,11 @@
-
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
     [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private GameObject fastEnemyPrefab;
+    [SerializeField] private GameObject tankEnemyPrefab;
+
     [SerializeField] private Transform player;
     [SerializeField] private float spawnInterval = 3f;
     [SerializeField] private float spawnDistance = 7f;
@@ -39,8 +41,21 @@ public class EnemySpawner : MonoBehaviour
         Vector3 position = player.position +
             (Vector3)(direction * spawnDistance);
 
+        float chance = Random.value;
+        GameObject selectedPrefab = enemyPrefab;
+
+        if (chance < 0.2f && tankEnemyPrefab != null)
+        {
+            selectedPrefab = tankEnemyPrefab;
+        }
+        else if (chance >= 0.2f && chance < 0.5f &&
+                 fastEnemyPrefab != null)
+        {
+            selectedPrefab = fastEnemyPrefab;
+        }
+
         GameObject enemy = Instantiate(
-            enemyPrefab,
+            selectedPrefab,
             position,
             Quaternion.identity
         );

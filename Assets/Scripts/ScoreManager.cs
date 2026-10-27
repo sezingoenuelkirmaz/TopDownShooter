@@ -1,4 +1,3 @@
-
 using UnityEngine;
 
 public class ScoreManager : MonoBehaviour
@@ -20,9 +19,14 @@ public class ScoreManager : MonoBehaviour
 
     private void OnGUI()
     {
+        GUIStyle style = new GUIStyle(GUI.skin.label);
+        style.fontSize = 24;
+        style.normal.textColor = Color.white;
+
         GUI.Label(
-            new Rect(20, 50, 200, 30),
-            "Skor: " + score
+            new Rect(20, 50, 250, 40),
+            "Skor: " + score,
+            style
         );
     }
 }

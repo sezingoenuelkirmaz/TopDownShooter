@@ -1,4 +1,4 @@
-
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -8,8 +8,12 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private int maxHealth = 5;
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip hurtSound;
+    [SerializeField] private float flashDuration = 0.2f;
 
     private int currentHealth;
+    private SpriteRenderer spriteRenderer;
+    private Color originalColor;
+    private Coroutine flashCoroutine;
 
     public bool IsDead => currentHealth <= 0;
 
@@ -19,6 +23,11 @@ public class PlayerHealth : MonoBehaviour
 
         if (audioSource == null)
             audioSource = GetComponent<AudioSource>();
+
+        spriteRenderer = GetComponent<SpriteRenderer>();
+
+        if (spriteRenderer != null)
+            originalColor = spriteRenderer.color;
     }
 
     private void Update()
@@ -33,6 +42,16 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
+    // Can paketinden can kazanma
+    public bool Heal(int amount)
+    {
+        if (IsDead || currentHealth >= maxHealth)
+            return false;
+
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        return true;
+    }
+
     public void TakeDamage(int damage)
     {
         if (IsDead) return;
@@ -45,19 +64,42 @@ public class PlayerHealth : MonoBehaviour
             audioSource.PlayOneShot(hurtSound);
         }
 
-        // Oyuncu öldüğünde
+        // Hasar alınca kısa süre pembe yan
+        if (spriteRenderer != null)
+        {
+            if (flashCoroutine != null)
+                StopCoroutine(flashCoroutine);
+
+            flashCoroutine = StartCoroutine(FlashPink());
+        }
+
         if (IsDead)
         {
             Debug.Log("GAME OVER!");
         }
     }
 
+    private IEnumerator FlashPink()
+    {
+        spriteRenderer.color = Color.magenta;
+
+        yield return new WaitForSeconds(flashDuration);
+
+        spriteRenderer.color = originalColor;
+        flashCoroutine = null;
+    }
+
     private void OnGUI()
     {
         // Can göstergesi
+        GUIStyle healthStyle = new GUIStyle(GUI.skin.label);
+        healthStyle.fontSize = 24;
+        healthStyle.normal.textColor = Color.white;
+
         GUI.Label(
-            new Rect(20, 20, 200, 30),
-            "Can: " + currentHealth + " / " + maxHealth
+            new Rect(20, 20, 250, 40),
+            "Can: " + currentHealth + " / " + maxHealth,
+            healthStyle
         );
 
         // Ölüm ekranı

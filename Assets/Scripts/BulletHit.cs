@@ -1,4 +1,3 @@
-
 using UnityEngine;
 
 public class BulletHit : MonoBehaviour
@@ -13,12 +12,27 @@ public class BulletHit : MonoBehaviour
         {
             hasHit = true;
 
-            if (ScoreManager.Instance != null)
+            EnemyHealth health = other.GetComponent<EnemyHealth>();
+
+            if (health != null)
             {
-                ScoreManager.Instance.AddScore(1);
+                // Canı olan düşmana 1 hasar ver
+                health.TakeDamage(1);
+            }
+            else
+            {
+                // Normal ve hızlı düşman tek mermide ölür
+                if (ScoreManager.Instance != null)
+                    ScoreManager.Instance.AddScore(1);
+
+                EnemyDeath death = other.GetComponent<EnemyDeath>();
+
+                if (death == null)
+                    death = other.gameObject.AddComponent<EnemyDeath>();
+
+                death.Die();
             }
 
-            Destroy(other.gameObject);
             Destroy(gameObject);
         }
     }
