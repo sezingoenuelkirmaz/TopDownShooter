@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -9,6 +10,12 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip hurtSound;
     [SerializeField] private float flashDuration = 0.2f;
+
+    // UI (Canvas): Herzen
+    [SerializeField] private Image[] hearts;
+    [SerializeField] private Sprite fullHeart;
+    [SerializeField] private Sprite emptyHeart;
+    [SerializeField] private GameObject gameOverPanel;
 
     private int currentHealth;
     private SpriteRenderer spriteRenderer;
@@ -28,6 +35,11 @@ public class PlayerHealth : MonoBehaviour
 
         if (spriteRenderer != null)
             originalColor = spriteRenderer.color;
+
+        UpdateHearts();
+
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
     }
 
     private void Update()
@@ -49,6 +61,7 @@ public class PlayerHealth : MonoBehaviour
             return false;
 
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        UpdateHearts();
         return true;
     }
 
@@ -57,6 +70,7 @@ public class PlayerHealth : MonoBehaviour
         if (IsDead) return;
 
         currentHealth = Mathf.Max(0, currentHealth - damage);
+        UpdateHearts();
 
         // Hasar alma sesi
         if (audioSource != null && hurtSound != null)
@@ -76,6 +90,9 @@ public class PlayerHealth : MonoBehaviour
         if (IsDead)
         {
             Debug.Log("GAME OVER!");
+
+            if (gameOverPanel != null)
+                gameOverPanel.SetActive(true);
         }
     }
 
@@ -89,52 +106,16 @@ public class PlayerHealth : MonoBehaviour
         flashCoroutine = null;
     }
 
-    private void OnGUI()
+    private void UpdateHearts()
     {
-        // Can göstergesi
-        GUIStyle healthStyle = new GUIStyle(GUI.skin.label);
-        healthStyle.fontSize = 24;
-        healthStyle.normal.textColor = Color.white;
+        if (hearts == null) return;
 
-        GUI.Label(
-            new Rect(20, 20, 250, 40),
-            "Can: " + currentHealth + " / " + maxHealth,
-            healthStyle
-        );
-
-        // Ölüm ekranı
-        if (IsDead)
+        for (int i = 0; i < hearts.Length; i++)
         {
-            GUIStyle style = new GUIStyle(GUI.skin.label);
-            style.fontSize = 40;
-            style.alignment = TextAnchor.MiddleCenter;
-            style.normal.textColor = Color.red;
-
-            GUI.Label(
-                new Rect(
-                    Screen.width / 2 - 200,
-                    Screen.height / 2 - 80,
-                    400,
-                    80
-                ),
-                "GAME OVER",
-                style
-            );
-
-            GUIStyle restartStyle = new GUIStyle(GUI.skin.label);
-            restartStyle.fontSize = 20;
-            restartStyle.alignment = TextAnchor.MiddleCenter;
-
-            GUI.Label(
-                new Rect(
-                    Screen.width / 2 - 200,
-                    Screen.height / 2,
-                    400,
-                    40
-                ),
-                "Press R to Restart",
-                restartStyle
-            );
+            if (i < currentHealth)
+                hearts[i].sprite = fullHeart;
+            else
+                hearts[i].sprite = emptyHeart;
         }
     }
 }

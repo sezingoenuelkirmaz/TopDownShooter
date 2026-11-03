@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "TopDownShooter.slnx"
+    "dotnet.defaultSolution": "My project.slnx"
 }
